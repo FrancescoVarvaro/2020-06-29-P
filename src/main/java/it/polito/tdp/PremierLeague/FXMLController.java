@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.PremierLeague.model.Adiacenze;
 import it.polito.tdp.PremierLeague.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,7 +41,7 @@ public class FXMLController {
     private TextField txtMinuti; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbMese"
-    private ComboBox<?> cmbMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbM1"
     private ComboBox<?> cmbM1; // Value injected by FXMLLoader
@@ -52,17 +54,53 @@ public class FXMLController {
 
     @FXML
     void doConnessioneMassima(ActionEvent event) {
-    	
+    	txtResult.clear();
+    	try {
+    		if(txtMinuti.getText().equals("")) {
+    			txtResult.appendText("ERRORE: inserire minuti");
+    			return;
+    		}
+    		List<Adiacenze> lista = model.getPesoMax();
+    		if(lista != null) {
+    			txtResult.appendText("connessione Max: \n"+model.getPesoMax()+"\n");
+    		}else {
+    			txtResult.appendText("ERRORE creare grafo prima");
+    			return;
+    		}
+    		
+    	}catch(Exception e) {
+    		txtResult.appendText("ERRORE");
+    		return;
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    	
+    	txtResult.clear();
+    	int minuto;
+    	try {
+    		minuto = Integer.parseInt(txtMinuti.getText());
+    		if ((minuto < 0) || (minuto > 90)) {
+				txtResult.setText("Inserire un anno nell'intervallo 0 - 90");
+				return;
+			}
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("Inserire un minuto nell'intervallo 0 - 90");
+    		return;
+    	}
+    	if(cmbMese.getValue()!= null) {
+        	model.creaGrafo(cmbMese.getValue(), minuto);
+        	txtResult.appendText("vertici: "+model.nVertici()+"\n");
+        	txtResult.appendText("archi: "+model.nEdge()+"\n");
+    	}else {
+    		txtResult.appendText("inserire un mese");
+    		return;
+    	}
     }
 
     @FXML
     void doCollegamento(ActionEvent event) {
-    	
+    
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -79,7 +117,9 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
-  
+    	for(int i = 0; i<12; i++) {
+    		cmbMese.getItems().add(i);
+    	}
     }
     
     
